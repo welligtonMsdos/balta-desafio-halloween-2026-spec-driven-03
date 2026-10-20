@@ -2,7 +2,7 @@
 
 ## 🎃 Halloween - Desafio 3
 
-Oi, eu sou o [seu nome aqui] e este é o espaço onde compartilho minha jornada de aprendizado durante o desafio **Halloween 2026**, realizado pelo [balta.io](https://balta.io). 👻
+Oi, eu sou o Welligton Silva e este é o espaço onde compartilho minha jornada de aprendizado durante o desafio **Halloween 2026**, realizado pelo [balta.io](https://balta.io). 👻
 
 Aqui você vai encontrar projetos, exercícios e códigos que estou desenvolvendo durante o desafio.
 
@@ -25,4 +25,4 @@ Neste processo eu aprendi:
 O desafio **Halloween 2026** consiste em implementar implementar o modelo Spec Driven Development de ponta a ponta, criando apps completas com IA.
 
 ### Veja meu progresso no desafio
-[Incluir link para o repositório central]
+https://github.com/welligtonMsdos/balta-desafio-halloween-2026-spec-driven-03
