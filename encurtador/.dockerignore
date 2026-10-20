@@ -1,0 +1,9 @@
+bin/
+obj/
+.vscode/
+.git/
+.gitignore
+*.log
+.env*
+coverage/
+node_modules/

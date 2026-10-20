@@ -1,0 +1,194 @@
+openapi: 3.1.0
+info:
+  title: Link Shortener API
+  version: 1.0.0
+  description: API para criar links curtos, redirecionar visitantes e consultar acessos.
+servers:
+  - url: http://localhost:8080
+paths:
+  /api/links:
+    post:
+      operationId: createLink
+      summary: Cria um link curto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLinkRequest'
+      responses:
+        '201':
+          description: Link criado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LinkCreated'
+        '400':
+          description: Entrada inválida.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '409':
+          description: Código personalizado já utilizado.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '429':
+          description: Limite de criações por endereço de origem atingido.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+  /api/links/{code}/stats:
+    get:
+      operationId: getLinkStats
+      summary: Consulta os acessos de um link
+      parameters:
+        - $ref: '#/components/parameters/Code'
+      responses:
+        '200':
+          description: Estatísticas do link.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LinkStats'
+        '404':
+          description: Código não encontrado.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+  /{code}:
+    get:
+      operationId: redirectLink
+      summary: Redireciona para o destino de um link ativo
+      parameters:
+        - $ref: '#/components/parameters/Code'
+      responses:
+        '302':
+          description: Redirecionamento para o destino salvo.
+          headers:
+            Location:
+              required: true
+              schema:
+                type: string
+                format: uri
+        '404':
+          description: Código não encontrado.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '410':
+          description: Link expirado.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+components:
+  parameters:
+    Code:
+      name: code
+      in: path
+      required: true
+      description: Código ASCII alfanumérico, sem distinção entre maiúsculas e minúsculas.
+      schema:
+        type: string
+        minLength: 4
+        maxLength: 20
+        pattern: '^[A-Za-z0-9]+$'
+  schemas:
+    CreateLinkRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - destinationUrl
+      properties:
+        destinationUrl:
+          type: string
+          format: uri
+          maxLength: 2048
+          description: URL absoluta com esquema HTTP ou HTTPS.
+        customCode:
+          type: string
+          minLength: 4
+          maxLength: 20
+          pattern: '^[A-Za-z0-9]+$'
+        expiresAt:
+          type: string
+          format: date-time
+          description: Instante futuro; sem offset, interpretar como UTC.
+    LinkCreated:
+      type: object
+      required:
+        - code
+        - shortUrl
+        - destinationUrl
+        - createdAt
+        - expiresAt
+      properties:
+        code:
+          type: string
+          description: Código canônico em maiúsculas.
+        shortUrl:
+          type: string
+          format: uri
+        destinationUrl:
+          type: string
+          format: uri
+        createdAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type:
+            - string
+            - 'null'
+          format: date-time
+    LinkStats:
+      type: object
+      required:
+        - code
+        - accessCount
+        - createdAt
+        - expiresAt
+      properties:
+        code:
+          type: string
+        accessCount:
+          type: integer
+          format: int64
+          minimum: 0
+        createdAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type:
+            - string
+            - 'null'
+          format: date-time
+    ProblemDetails:
+      type: object
+      description: RFC 9457 Problem Details; title and detail are written in Portuguese.
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title:
+          type: string
+          description: Título em português.
+        status:
+          type: integer
+        detail:
+          type: string
+          description: Mensagem clara em português.
+        instance:
+          type: string
+          format: uri-reference
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
